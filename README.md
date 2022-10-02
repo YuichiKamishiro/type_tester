@@ -4,10 +4,10 @@
 sudo apt-get install libncurses5-dev libncursesw5-dev
 ```
 
-# Build
+# Build and Run
 
 ```
 cd type_tester/ && mkdir build
-cmake .. && make
+cd build/ && cmake .. && make
 ./run
 ```
