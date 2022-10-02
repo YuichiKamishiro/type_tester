@@ -53,17 +53,32 @@ void typeTrainer::input() {
     if(pointer == str_buffer.size()) pointer -= 1;
 }
 
-void typeTrainer::timeMenu() {
+void typeTrainer::accMenu() {
     using namespace std::chrono;
-    if(typed) {
-        steady_clock::time_point timer_now = steady_clock::now();
-        mvprintw(7, 7 + str_buffer.size(), "seconds %d", duration_cast<seconds>(timer_now - timer).count());
-    } else {
-        mvprintw(7, 7 + str_buffer.size(), "seconds");
+
+    clear();
+    
+    steady_clock::time_point time_end = steady_clock::now();
+    int sec = duration_cast<seconds>(time_end - timer).count();
+
+    int correct_char = 0;
+    for(char c : str_status) {
+        if(c == '1') ++correct_char;
     }
+
+    int cpm = correct_char * (60 / sec);
+    int wpm = cpm / 5;
+    
+
+    mvprintw(5, 5, "cpm = %d wpm = %d", cpm, wpm);
+    
+    refresh();
+    timeout(-1);
+    getch();
+    end = true;
 }
 
 void typeTrainer::isEnd() {
     if(pointer == str_buffer.size() - 1 && 
-       str_status[str_status.size() - 1] == '1') {end = true;};
+       str_status[str_status.size() - 1] == '1') {accMenu();};
 }

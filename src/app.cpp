@@ -20,7 +20,6 @@ void app::run() {
     while(typeTr.end == false){
         typeTr.input();
         typeTr.isEnd();
-        typeTr.timeMenu();
 
         for(int i = 0; i < typeTr.str_buffer.size(); ++i) {
             if(typeTr.str_status[i] == '1') {

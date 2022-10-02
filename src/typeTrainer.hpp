@@ -20,5 +20,4 @@ public:
     void input();
     void isEnd();
     void accMenu();
-    void timeMenu();
 };
