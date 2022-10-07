@@ -3,7 +3,7 @@
 
 class app {
 public:
-    typeTrainer typeTr;
+    typingTrainer typing_trainer;
     app(int);
     void run();
 };

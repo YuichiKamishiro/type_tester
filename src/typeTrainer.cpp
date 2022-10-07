@@ -1,84 +1,152 @@
 #include "typeTrainer.hpp"
-#include <algorithm>
-#include <chrono>
+#include <curses.h>
 
-typeTrainer::typeTrainer(int amount_of_words) {
+using namespace std::chrono;
+
+typingTrainer::typingTrainer(int amount_of_words) {
     ifstr.open("../words.txt");
+    // handling errors
     if(!ifstr.is_open()) {std::cout << "Can't open file!\n";}
     
     std::vector<std::string> all_words;
     std::string buffer;
+    // registrating all words
     while(getline(ifstr, buffer)) {
         all_words.push_back(buffer);
     }
 
+    // random device for random
     std::random_device rd;
     std::mt19937 g(rd());
  
+    // shuffling all words
     std::shuffle(all_words.begin(), all_words.end(), g);
  
+    // adding spaces to words
     for(int i = 0; i < amount_of_words; ++i) {
         str_buffer += all_words[i];
         if(i + 1 < amount_of_words) str_buffer += ' ';
     }
 
+    // filling status buffer as unentered 
     for(int i = 0; i < str_buffer.size(); ++i) {
         str_status += '2';
     }
 }
 
-void typeTrainer::input() {
+void typingTrainer::input() {
+    // handling user input
     int c = getch();
-    
+
+    // checking first input
     if(c != -1 && !typed) {
         typed = true;
-        timer = std::chrono::steady_clock::now();
+        timer = steady_clock::now();
     }
-
+    // handling backspace
     if(c == KEY_BACKSPACE) {
         if(str_status[pointer] == '2') {
+            if(str_status[pointer - 1] == '1') --correct_chars;
+            else if(str_status[pointer - 1] == '0') --uncorrect_chars;
             str_status[pointer - 1] = '2';
             --pointer;
         } else{
+            if(str_status[pointer - 1] == '1') --correct_chars;
+            else if(str_status[pointer - 1] == '0') --uncorrect_chars;
             str_status[pointer] = '2';
             --pointer;
         }
     } else if(str_buffer[pointer] == c && c != -1){
         str_status[pointer] = '1';
         ++pointer;
+        ++correct_chars;
     } else if(str_buffer[pointer] != c && c != -1){
         str_status[pointer] = '0';
         ++pointer;
+        ++uncorrect_chars;
     }
+    // checking pointer
     if(pointer == str_buffer.size()) pointer -= 1;
+
+    // registrating cpm
+    if(c != -1) {
+        steady_clock::time_point time_end = steady_clock::now();
+        float millis = duration_cast<milliseconds>(time_end - timer).count();
+
+        int cpm = (correct_chars - uncorrect_chars) * (60000 / millis);
+        if(cpm > 0) all_cpms.push_back(cpm);
+    }
 }
 
-void typeTrainer::accMenu() {
-    using namespace std::chrono;
-
+void typingTrainer::accMenu() {
     clear();
     
+    // final cpm
     steady_clock::time_point time_end = steady_clock::now();
     int sec = duration_cast<seconds>(time_end - timer).count();
 
-    int correct_char = 0;
-    for(char c : str_status) {
-        if(c == '1') ++correct_char;
-    }
-
-    int cpm = correct_char * (60 / sec);
+    int cpm = (correct_chars - uncorrect_chars) * (60 / sec);
     int wpm = cpm / 5;
     
-
-    mvprintw(5, 5, "cpm = %d wpm = %d", cpm, wpm);
+    // generate graph
+    std::vector<int> cpms_for_graph;
     
+    std::vector<int> unique_all_cpms;
+
+    for(int i = 0; i < all_cpms.size(); ++i) {
+        if(std::find(unique_all_cpms.begin(), unique_all_cpms.end(), all_cpms[i]) == unique_all_cpms.end()) {
+            unique_all_cpms.push_back(all_cpms[i]);
+        }
+    }
+    
+    float cf = 10.f / (unique_all_cpms.size() - 1);
+    float isStep = 0.f;
+
+    if(unique_all_cpms.size() < 10) {
+        mvprintw(30, 0, "graph is small");
+    }
+    
+    for(int i = 0; i < unique_all_cpms.size(); ++i) {
+        isStep += cf;
+        if(isStep >= 1.f) {
+            cpms_for_graph.push_back(unique_all_cpms[i]);
+            isStep -= 1.f;
+        }
+    }
+
+    std::vector<int> sorted_cpms_for_graph = cpms_for_graph;
+    std::sort(sorted_cpms_for_graph.begin(), sorted_cpms_for_graph.end());
+    std::vector<std::pair<int, int>> graph_vector;
+
+    for(int i = 0; i < cpms_for_graph.size(); ++i) {
+    for(int j = 0; j < sorted_cpms_for_graph.size(); ++j) {
+        if(sorted_cpms_for_graph[j] == cpms_for_graph[i]) graph_vector.push_back({cpms_for_graph[i], j + 1});    
+    }}
+
+    // draw cpm wpm
+    mvprintw(0, 0, "cpm = %d wpm = %d", cpm, wpm);
+    
+    std::reverse(sorted_cpms_for_graph.begin(), sorted_cpms_for_graph.end());
+    for(int i = 0;i < sorted_cpms_for_graph.size(); ++i) {
+        mvprintw(2 + i, 0, "%d", sorted_cpms_for_graph[i]);
+    }
+
+    // draw graph
+    for(int i = 0; i < graph_vector.size(); ++i) {
+    for(int j = 0; j < graph_vector[i].second; ++j) {
+        mvprintw(11 - j, i * 2 + 4, "*");
+    }}
+    
+    mvprintw(12, 4, "1 2 3 4 5 6 7 8 9 10");
+
     refresh();
     timeout(-1);
     getch();
     end = true;
 }
 
-void typeTrainer::isEnd() {
+void typingTrainer::isEnd() {
+    // cheking last symbol
     if(pointer == str_buffer.size() - 1 && 
        str_status[str_status.size() - 1] == '1') {accMenu();};
 }
