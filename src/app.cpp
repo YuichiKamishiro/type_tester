@@ -6,6 +6,8 @@ app::app(int amount_of_words) : typing_trainer(amount_of_words) {
 }
 
 void app::run() {
+    setlocale(LC_ALL, "");
+
     initscr();
     noecho();
     nodelay(stdscr, TRUE);

@@ -1,4 +1,4 @@
-#include "typeTrainer.hpp"
+#include "type_trainer.hpp"
 #include <utility>
 
 class app {

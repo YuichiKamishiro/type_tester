@@ -6,6 +6,7 @@
 #include <chrono>
 
 #include "curses.h"
+#include "locale.h"
 
 class typingTrainer{
 public:

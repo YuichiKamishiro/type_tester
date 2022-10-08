@@ -1,10 +1,11 @@
-#include "typeTrainer.hpp"
+#include "type_trainer.hpp"
+#include <chrono>
 #include <curses.h>
 
 using namespace std::chrono;
 
 typingTrainer::typingTrainer(int amount_of_words) {
-    ifstr.open("../words.txt");
+    ifstr.open("words.txt");
     // handling errors
     if(!ifstr.is_open()) {std::cout << "Can't open file!\n";}
     
@@ -74,6 +75,7 @@ void typingTrainer::input() {
         float millis = duration_cast<milliseconds>(time_end - timer).count();
 
         int cpm = (correct_chars - uncorrect_chars) * (60000 / millis);
+        
         if(cpm > 0) all_cpms.push_back(cpm);
     }
 }
@@ -83,9 +85,11 @@ void typingTrainer::accMenu() {
     
     // final cpm
     steady_clock::time_point time_end = steady_clock::now();
-    int sec = duration_cast<seconds>(time_end - timer).count();
+    int millis = duration_cast<milliseconds>(time_end - timer).count();
 
-    int cpm = (correct_chars - uncorrect_chars) * (60 / sec);
+    int cpm = (correct_chars - uncorrect_chars) * (60000 / millis);
+    if(cpm < 0) cpm = 0;
+
     int wpm = cpm / 5;
     
     // generate graph
@@ -99,18 +103,18 @@ void typingTrainer::accMenu() {
         }
     }
     
-    float cf = 10.f / (unique_all_cpms.size() - 1);
-    float isStep = 0.f;
+    double cf = 10.f / (unique_all_cpms.size());
+    double isStep = cf;
 
     if(unique_all_cpms.size() < 10) {
-        mvprintw(30, 0, "graph is small");
+        mvprintw(30, 0, "error: too little information");
     }
     
     for(int i = 0; i < unique_all_cpms.size(); ++i) {
         isStep += cf;
-        if(isStep >= 1.f) {
+        if(isStep >= 1.) {
+            isStep -= 1.;
             cpms_for_graph.push_back(unique_all_cpms[i]);
-            isStep -= 1.f;
         }
     }
 
@@ -128,7 +132,7 @@ void typingTrainer::accMenu() {
     
     std::reverse(sorted_cpms_for_graph.begin(), sorted_cpms_for_graph.end());
     for(int i = 0;i < sorted_cpms_for_graph.size(); ++i) {
-        mvprintw(2 + i, 0, "%d", sorted_cpms_for_graph[i]);
+        mvprintw(2 + i + 10 - sorted_cpms_for_graph.size(), 0, "%d", sorted_cpms_for_graph[i]);
     }
 
     // draw graph
@@ -138,7 +142,7 @@ void typingTrainer::accMenu() {
     }}
     
     mvprintw(12, 4, "1 2 3 4 5 6 7 8 9 10");
-
+    
     refresh();
     timeout(-1);
     getch();
