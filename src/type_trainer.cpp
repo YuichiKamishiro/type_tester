@@ -133,14 +133,14 @@ void typingTrainer::accMenu() {
         mvprintw(2 + i + 10 - sorted_cpms_for_graph.size(), 0, "%d", sorted_cpms_for_graph[i]);
     }
 
-    init_pair(1, COLOR_BLACK, COLOR_GREEN);
+    init_pair(3, COLOR_BLACK, COLOR_GREEN);
 
     // draw graph
     for(int i = 0; i < graph_vector.size(); ++i) {
     for(int j = 0; j < graph_vector[i].second; ++j) {
-        attron(COLOR_PAIR(1));
+        attron(COLOR_PAIR(3));
         mvaddwstr(11 - j, i * 2 + 4, L"\u3164");
-        attroff(COLOR_PAIR(1));
+        attroff(COLOR_PAIR(3));
     }}
     
     mvprintw(12, 4, "1 2 3 4 5 6 7 8 9 10");
@@ -160,7 +160,7 @@ void typingTrainer::modeMenu() {
     const int SIZE = 3;
     std::string choices[SIZE] {"5", "10", "15"};
 
-    init_pair(3, COLOR_BLACK, COLOR_WHITE);
+    init_pair(4, COLOR_BLACK, COLOR_WHITE);
     
     bool entered = false;
 
@@ -177,9 +177,9 @@ void typingTrainer::modeMenu() {
         // drawing our menu
         for(int i = 0; i < SIZE; ++i) {
             if(highlight_ptr == i) {
-                wattron(win, COLOR_PAIR(3));
+                wattron(win, COLOR_PAIR(4));
                 mvwprintw(win, 1 + i, 1, choices[i].c_str());
-                wattroff(win, COLOR_PAIR(3));
+                wattroff(win, COLOR_PAIR(4));
             } else {
                 mvwprintw(win, 1 + i, 1, choices[i].c_str());
             }
