@@ -132,7 +132,7 @@ void typingTrainer::accMenu() {
     for(int i = 0;i < sorted_cpms_for_graph.size(); ++i) {
         mvprintw(2 + i + 10 - sorted_cpms_for_graph.size(), 0, "%d", sorted_cpms_for_graph[i]);
     }
-
+    
     init_pair(3, COLOR_BLACK, COLOR_GREEN);
 
     // draw graph
@@ -155,8 +155,9 @@ void typingTrainer::accMenu() {
 
 void typingTrainer::modeMenu() {
     WINDOW *win = newwin(5, 50, 0, 0);
+    
     keypad(win, TRUE);
-
+    
     const int SIZE = 3;
     std::string choices[SIZE] {"5", "10", "15"};
 

@@ -5,10 +5,10 @@ app::app(){
 }
 
 void app::run() {
-    // starting colors
-    start_color();
     // initialize screen
     initscr();
+    // turning on colors
+    start_color();
     // turning off echo
     noecho();
     // no delay for input
