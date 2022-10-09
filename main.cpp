@@ -1,6 +1,7 @@
 #include "src/app.hpp"
+#include <curses.h>
 
 int main(){
-    app a(10);
+    app a;
     a.run();
 }

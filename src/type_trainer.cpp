@@ -4,7 +4,10 @@
 
 using namespace std::chrono;
 
-typingTrainer::typingTrainer(int amount_of_words) {
+typingTrainer::typingTrainer() {
+}
+
+void typingTrainer::init() {
     ifstr.open("words.txt");
     // handling errors
     if(!ifstr.is_open()) {std::cout << "Can't open file!\n";}
@@ -33,6 +36,7 @@ typingTrainer::typingTrainer(int amount_of_words) {
     for(int i = 0; i < str_buffer.size(); ++i) {
         str_status += '2';
     }
+
 }
 
 void typingTrainer::input() {
@@ -97,18 +101,12 @@ void typingTrainer::accMenu() {
     
     std::vector<int> unique_all_cpms;
 
-    for(int i = 0; i < all_cpms.size(); ++i) {
-        if(std::find(unique_all_cpms.begin(), unique_all_cpms.end(), all_cpms[i]) == unique_all_cpms.end()) {
-            unique_all_cpms.push_back(all_cpms[i]);
-        }
-    }
+    for(int i = 0; i < all_cpms.size(); ++i) if(std::find(unique_all_cpms.begin(), unique_all_cpms.end(), all_cpms[i]) == unique_all_cpms.end()) unique_all_cpms.push_back(all_cpms[i]);
     
     double cf = 10.f / (unique_all_cpms.size());
     double isStep = cf;
 
-    if(unique_all_cpms.size() < 10) {
-        mvprintw(30, 0, "error: too little information");
-    }
+    if(unique_all_cpms.size() < 10) mvprintw(17, 0, "error: too little information");
     
     for(int i = 0; i < unique_all_cpms.size(); ++i) {
         isStep += cf;
@@ -135,22 +133,77 @@ void typingTrainer::accMenu() {
         mvprintw(2 + i + 10 - sorted_cpms_for_graph.size(), 0, "%d", sorted_cpms_for_graph[i]);
     }
 
+    init_pair(1, COLOR_BLACK, COLOR_GREEN);
+
     // draw graph
     for(int i = 0; i < graph_vector.size(); ++i) {
     for(int j = 0; j < graph_vector[i].second; ++j) {
-        mvprintw(11 - j, i * 2 + 4, "*");
+        attron(COLOR_PAIR(1));
+        mvaddwstr(11 - j, i * 2 + 4, L"\u3164");
+        attroff(COLOR_PAIR(1));
     }}
     
     mvprintw(12, 4, "1 2 3 4 5 6 7 8 9 10");
     
     refresh();
     timeout(-1);
+    mvprintw(13, 0, "Please press any key to quit");
+    refresh();
     getch();
     end = true;
 }
 
+void typingTrainer::modeMenu() {
+    WINDOW *win = newwin(5, 50, 0, 0);
+    keypad(win, TRUE);
+
+    const int SIZE = 3;
+    std::string choices[SIZE] {"5", "10", "15"};
+
+    init_pair(3, COLOR_BLACK, COLOR_WHITE);
+    
+    bool entered = false;
+
+    int highlight_ptr = 0;
+
+    while(!entered) {
+        // clearing screen without refreshing
+        werase(win);
+        // box
+        box(win, 0, 0);
+        // text 
+        mvwaddwstr(win, 0, 1, L"Mode selection[words]");
+    
+        // drawing our menu
+        for(int i = 0; i < SIZE; ++i) {
+            if(highlight_ptr == i) {
+                wattron(win, COLOR_PAIR(3));
+                mvwprintw(win, 1 + i, 1, choices[i].c_str());
+                wattroff(win, COLOR_PAIR(3));
+            } else {
+                mvwprintw(win, 1 + i, 1, choices[i].c_str());
+            }
+        }
+        
+        if(highlight_ptr > SIZE - 1) highlight_ptr = SIZE - 1;
+        else if(highlight_ptr < 0) highlight_ptr = 0;
+
+        int c = getch();
+
+        switch(c) {
+            case KEY_UP: --highlight_ptr; break;
+            case KEY_DOWN: ++highlight_ptr; break;
+            // KEY_ENTER doen't work so we use 10
+            case 10: amount_of_words = stoi(choices[highlight_ptr]); init(); entered = true; break;
+        }
+
+        wrefresh(win);
+    }
+    clear();
+}
+
 void typingTrainer::isEnd() {
-    // cheking last symbol
+    // checking last symbol
     if(pointer == str_buffer.size() - 1 && 
        str_status[str_status.size() - 1] == '1') {accMenu();};
 }

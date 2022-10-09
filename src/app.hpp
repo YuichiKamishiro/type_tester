@@ -4,6 +4,6 @@
 class app {
 public:
     typingTrainer typing_trainer;
-    app(int);
+    app();
     void run();
 };

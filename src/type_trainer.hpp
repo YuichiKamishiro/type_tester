@@ -19,10 +19,12 @@ public:
     int pointer = 0;
     int correct_chars = 0;
     int uncorrect_chars = 0;
+    int amount_of_words = 5;
 
-    typingTrainer(int);
-    void find_helper_func(std::vector<int> &);
+    typingTrainer();
+    void init();
     void input();
     void isEnd();
     void accMenu();
+    void modeMenu();
 };

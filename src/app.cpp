@@ -1,23 +1,29 @@
 #include "app.hpp"
 #include <curses.h>
 
-app::app(int amount_of_words) : typing_trainer(amount_of_words) {
-    
+app::app(){
 }
 
 void app::run() {
-    setlocale(LC_ALL, "");
-
+    start_color();
     initscr();
+
     noecho();
     nodelay(stdscr, TRUE);
     curs_set(0);
     keypad(stdscr, TRUE);
+    setlocale(LC_ALL, "");
+    start_color();
+    
 
     start_color();
-    init_pair(1, COLOR_RED, COLOR_BLACK);
+    
+    // 8 it's gray
+    init_pair(1, COLOR_RED, 8);
     init_pair(2, COLOR_GREEN, COLOR_BLACK);
     
+
+    typing_trainer.modeMenu();
 
     while(typing_trainer.end == false){
         typing_trainer.input();
